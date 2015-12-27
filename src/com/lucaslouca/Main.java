@@ -107,8 +107,7 @@ public class Main {
 
         List<String> lineList = new ArrayList<String>();
         BufferedReader br = new BufferedReader(new FileReader(file));
-        String inline;
-        while ((inline = br.readLine()) != null) {
+        for (String inline; (inline = br.readLine()) != null;) {
             lineList.add(inline);
             currentBytesRead += inline.length();
             if (currentBytesRead >= chunkSizeInBytes) {
@@ -123,6 +122,7 @@ public class Main {
             // Write remaining
             Collections.sort(lineList);
             chunkPaths.add(writeChunk(lineList));
+            lineList.clear();
         }
         br.close();
 
@@ -186,10 +186,10 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            String path = createLargeFileOfSize(LARGE_FILE_SIZE_IN_MB);
-            System.out.println("Created file of size "+LARGE_FILE_SIZE_IN_MB+"MB at '"+path+"'");
+            //String path = createLargeFileOfSize(LARGE_FILE_SIZE_IN_MB);
+            //System.out.println("Created file of size "+LARGE_FILE_SIZE_IN_MB+"MB at '"+path+"'");
 
-            List<String> chunkPaths = readFileInChunksOfSize(RAM_IN_MB, path);
+            List<String> chunkPaths = readFileInChunksOfSize(RAM_IN_MB, "/private/var/folders/78/7xkbvmw13j1ct62sdmnql2t40000gn/T/largefile1562707530496890079.txt");
             String resultPath = mergeChunks(chunkPaths);
             System.out.println("Created sorted file at '"+resultPath+"'");
 
