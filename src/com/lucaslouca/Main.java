@@ -108,7 +108,7 @@ public class Main {
         List<String> lineList = new ArrayList<String>();
         BufferedReader br = new BufferedReader(new FileReader(file));
         for (String inline; (inline = br.readLine()) != null;) {
-            lineList.add(inline);
+            lineList.add(inline.intern());
             currentBytesRead += inline.length();
             if (currentBytesRead >= chunkSizeInBytes) {
                 Collections.sort(lineList);
@@ -155,7 +155,7 @@ public class Main {
 
                 BUFFERED_READER_LOOP:
                 while ((inline = br.readLine()) != null) {
-                    lineList.add(inline);
+                    lineList.add(inline.intern());
                     currentBytesRead += inline.length();
                     if (currentBytesRead >= bytesToReadPerChunk) {
                         break BUFFERED_READER_LOOP;
