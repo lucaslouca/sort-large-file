@@ -52,7 +52,7 @@ public class Main {
      */
     private static String createLargeFileOfSize(int mb) throws IOException {
         File file = File.createTempFile("largefile", ".txt");
-        //file.deleteOnExit();
+        file.deleteOnExit();
 
         // x MB = x * 1024 KB = x * 1024 * 1024 Bytes
         int targetSizeInBytes = mb * 1024 * 1024;
