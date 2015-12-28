@@ -186,10 +186,10 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            //String path = createLargeFileOfSize(LARGE_FILE_SIZE_IN_MB);
-            //System.out.println("Created file of size "+LARGE_FILE_SIZE_IN_MB+"MB at '"+path+"'");
+            String path = createLargeFileOfSize(LARGE_FILE_SIZE_IN_MB);
+            System.out.println("Created file of size "+LARGE_FILE_SIZE_IN_MB+"MB at '"+path+"'");
 
-            List<String> chunkPaths = readFileInChunksOfSize(RAM_IN_MB, "/private/var/folders/78/7xkbvmw13j1ct62sdmnql2t40000gn/T/largefile1562707530496890079.txt");
+            List<String> chunkPaths = readFileInChunksOfSize(RAM_IN_MB, path);
             String resultPath = mergeChunks(chunkPaths);
             System.out.println("Created sorted file at '"+resultPath+"'");
 
