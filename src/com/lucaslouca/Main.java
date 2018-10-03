@@ -8,7 +8,7 @@ import java.util.*;
  *
  * @author lucas
  */
-public class DataSetSorter {
+public class Main {
     private final int RAM_IN_MB = 20;
 
     public File sort(String path) {
