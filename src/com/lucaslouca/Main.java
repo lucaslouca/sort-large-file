@@ -176,7 +176,7 @@ public class Main {
 
 
     public static void main(String[] args) {
-        String path = "INPUT_DIR/pre.txt";
+        String path = "INPUT_DIR/file.txt";
         DataSetSorter sorter = new DataSetSorter();
         File result = sorter.sort(path);
         System.out.println(result.getAbsolutePath());
