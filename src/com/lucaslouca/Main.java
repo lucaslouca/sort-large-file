@@ -4,71 +4,31 @@ import java.io.*;
 import java.util.*;
 
 /**
- * If you have a 2 GB file with one string per line, which sorting algorithm
- * would you use to sort the file and why?
+ * If you have a 2 GB file with one string per line, which sorting algorithm would you use to sort the file and why?
  *
  * @author lucas
  */
-public class Main {
-    private static final int RAM_IN_MB = 200;
-    private static final int LARGE_FILE_SIZE_IN_MB = 2000000;
+public class DataSetSorter {
+    private final int RAM_IN_MB = 20;
 
-    /**
-     * Return random between min (inclusive) and max (inclusive).
-     *
-     * @param min
-     * @param max
-     * @return
-     */
-    private static int random(int min, int max) {
-        Random random = new Random();
-        return min + random.nextInt(max - min + 1);
-    }
+    public File sort(String path) {
+        File ans = null;
+        try {
+            List<String> chunkPaths = this.readFileInChunksOfSize(RAM_IN_MB, path);
+            String resultPath = this.mergeChunks(chunkPaths, path + "_sorted");
+            ans = new File(resultPath);
 
-    /**
-     * Returns a random String of length len.
-     *
-     * @param len
-     * @return
-     */
-    private static String randomString(int len) {
-        final String alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        Random random = new Random();
+            // clean
+            for (String chuckPath : chunkPaths) {
+                new File(chuckPath).delete();
+            }
 
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            sb.append(alphabet.charAt(random.nextInt(alphabet.length())));
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return sb.toString();
-    }
 
-    /**
-     * Creates a large file of approximately mb megabytes size. Each line in the file contains
-     * a String of length 10. The file gets deleted on exit.
-     *
-     * @param mb
-     * @return the absolute path to the file.
-     * @throws IOException
-     */
-    private static String createLargeFileOfSize(int mb) throws IOException {
-        File file = File.createTempFile("largefile", ".txt");
-        file.deleteOnExit();
-
-        // x MB = x * 1024 KB = x * 1024 * 1024 Bytes
-        int targetSizeInBytes = mb * 1024 * 1024;
-        int currentSizeInBytes = 0;
-
-        PrintWriter pw = new PrintWriter(new FileWriter(file));
-        String line;
-        do {
-            line = randomString(random(3, 10));
-            pw.println(line);
-            currentSizeInBytes += line.length();
-        } while (currentSizeInBytes < targetSizeInBytes);
-
-        pw.close();
-
-        return file.getAbsolutePath();
+        return ans;
     }
 
     /**
@@ -78,7 +38,7 @@ public class Main {
      * @return
      * @throws IOException
      */
-    private static String writeChunk(List<String> lines) throws IOException {
+    private String writeChunk(List<String> lines) throws IOException {
         File file = File.createTempFile("largefile-chunk", ".txt");
         file.deleteOnExit();
 
@@ -99,7 +59,7 @@ public class Main {
      * @return List of paths to chunk files.
      * @throws IOException
      */
-    private static List<String> readFileInChunksOfSize(int mb, String path) throws IOException {
+    private List<String> readFileInChunksOfSize(int mb, String path) throws IOException {
         File file = new File(path);
         List<String> chunkPaths = new ArrayList<String>();
         int chunkSizeInBytes = mb * 1024 * 1024;
@@ -107,7 +67,7 @@ public class Main {
 
         List<String> lineList = new ArrayList<String>();
         BufferedReader br = new BufferedReader(new FileReader(file));
-        for (String inline; (inline = br.readLine()) != null;) {
+        for (String inline; (inline = br.readLine()) != null; ) {
             lineList.add(inline.intern());
             currentBytesRead += inline.length();
             if (currentBytesRead >= chunkSizeInBytes) {
@@ -130,7 +90,7 @@ public class Main {
     }
 
 
-        private String nextSmallestLine(BufferedReader[] bufferedReaders) throws IOException {
+    private String nextSmallestLine(BufferedReader[] bufferedReaders) throws IOException {
         // Find BufferedReader br with smallest line on top
         // and read from that br until line on top is not the
         // smallest one any more.
@@ -216,16 +176,9 @@ public class Main {
 
 
     public static void main(String[] args) {
-        try {
-            String path = createLargeFileOfSize(LARGE_FILE_SIZE_IN_MB);
-            System.out.println("Created file of size "+LARGE_FILE_SIZE_IN_MB+"MB at '"+path+"'");
-
-            List<String> chunkPaths = readFileInChunksOfSize(RAM_IN_MB, path);
-            String resultPath = mergeChunks(chunkPaths);
-            System.out.println("Created sorted file at '"+resultPath+"'");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String path = "INPUT_DIR/pre.txt";
+        DataSetSorter sorter = new DataSetSorter();
+        File result = sorter.sort(path);
+        System.out.println(result.getAbsolutePath());
     }
 }
