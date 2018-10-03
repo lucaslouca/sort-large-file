@@ -130,14 +130,47 @@ public class Main {
     }
 
 
-    private static String mergeChunks(List<String> chunkPaths) throws IOException {
-        File resultFile = File.createTempFile("largefile-result", ".txt");
+        private String nextSmallestLine(BufferedReader[] bufferedReaders) throws IOException {
+        // Find BufferedReader br with smallest line on top
+        // and read from that br until line on top is not the
+        // smallest one any more.
+
+        // Init line to something
+        final int READ_AHEAD_LIMIT = 100000;
+        int smallestLineBrIndex = -1;
+        String smallestLine = null;
+
+        for (int i = 0; i < bufferedReaders.length; i++) {
+            BufferedReader br = bufferedReaders[i];
+
+            // Mark br
+            br.mark(READ_AHEAD_LIMIT);
+
+            String currentLine = br.readLine();
+            if (currentLine != null && (smallestLine == null || (currentLine.compareTo(smallestLine)<0))) {
+                smallestLine = currentLine;
+                smallestLineBrIndex = i;
+            }
+        }
+
+        // Reset all BufferedReader except the one that had the smallest line
+        for (int i = 0; i < bufferedReaders.length; i++) {
+            if (i != smallestLineBrIndex) {
+                bufferedReaders[i].reset();
+            }
+        }
+
+
+        return smallestLine;
+    }
+
+
+    private String mergeChunks(List<String> chunkPaths, String outPath) throws IOException {
+        File resultFile = new File(outPath);
         PrintWriter resultPrintWriter = new PrintWriter(new FileWriter(resultFile));
 
         int numberOfChunks = chunkPaths.size();
         int bytesToReadPerChunk = (int) Math.ceil((RAM_IN_MB * 1024 * 1024) / (double) numberOfChunks);
-        System.out.println("numberOfChunks = " + numberOfChunks);
-        System.out.println("bytesToReadPerChunk = " + bytesToReadPerChunk);
 
         // Open a separate buffered reader for each chunk
         BufferedReader[] bufferedReaders = new BufferedReader[numberOfChunks];
@@ -150,27 +183,25 @@ public class Main {
         int currentBytesRead;
         int finishedChunks = 0;
         while (finishedChunks < numberOfChunks) {
-            for (BufferedReader br : bufferedReaders) {
-                currentBytesRead = 0;
-
-                BUFFERED_READER_LOOP:
-                while ((inline = br.readLine()) != null) {
-                    lineList.add(inline.intern());
-                    currentBytesRead += inline.length();
-                    if (currentBytesRead >= bytesToReadPerChunk) {
-                        break BUFFERED_READER_LOOP;
-                    }
+            currentBytesRead = 0;
+            BUFFERED_READER_LOOP:
+            while ((inline = this.nextSmallestLine(bufferedReaders)) != null){
+                lineList.add(inline.intern());
+                currentBytesRead += inline.length();
+                if (currentBytesRead >= bytesToReadPerChunk) {
+                    break BUFFERED_READER_LOOP;
                 }
+            }
 
-                if (inline == null) {
-                    finishedChunks++;
-                }
+            if (inline == null) {
+                finishedChunks++;
             }
 
             Collections.sort(lineList);
             for (String line : lineList) {
                 resultPrintWriter.println(line);
             }
+            resultPrintWriter.flush();
             lineList.clear();
         }
 
